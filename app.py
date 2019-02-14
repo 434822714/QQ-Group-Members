@@ -11,6 +11,8 @@ import arrow
 import pyexcel as pe
 from uuid import uuid4
 
+from ipython_genutils.py3compat import xrange
+
 attachments = {}
 sourceURL = 'http://qun.qq.com/member.html'
 
@@ -59,6 +61,8 @@ class QQGroup(object):
             'daid': '73',
             'pt_3rd_aid': '0'
         }
+        print("qrShow")
+        print(params)
         resp = self.sess.get(url, params=params, timeout=1000)
         return resp
 
@@ -85,6 +89,8 @@ class QQGroup(object):
             'aid': '715030901',
             'daid': '73'
         }
+        print("qrLogic")
+        print(params)
         resp = self.sess.get(url, params=params, timeout=1000)
         return resp
 
@@ -187,22 +193,24 @@ def qrShow():
 def qrLogin():
     resp = q.qrLogin()
     content = resp.content
+    print("@app.route('/qgmems/qrlogin')")
+    content1 = content.decode('utf-8')
     status = -1
     errorMsg = ''
     try:
-        if '二维码未失效' in content:
+        if '二维码未失效' in content1:
             status = 0
-        elif '二维码认证中' in content:
+        elif '二维码认证中' in content1:
             status = 1
-        elif '登录成功' in content:
+        elif '登录成功' in content1:
             status = 2
             pattern = r"(http://ptlogin2\.qun\.qq\.com/check_sig[^']+)"
-            url = re.search(pattern, content).group(1)
+            url = re.search(pattern, content1).group(1)
             q.sess.get(url, timeout=1000)
-        elif '二维码已失效' in content:
+        elif '二维码已失效' in content1:
             status = 3
         else:
-            errorMsg = str(content.text)
+            errorMsg = str(content1.text)
     except:
         try:
             errorMsg = str(resp.status_code)
@@ -223,10 +231,15 @@ def qrLogin():
 @app.route('/qgmems/glist')
 def groupList():
     resp = q.getGroupList()
+    print(resp)
+    print(resp.text)
     content = resp.json()
     create = content.get('create', [])
     manage = content.get('manage', [])
     joinin = content.get('join', [])
+    print(create)
+    print(manage)
+    print(joinin)
     markup = []
     if len(create) > 0:
         desc = u'<span>我创建的群(%s)</span>' % (len(create))
@@ -280,8 +293,11 @@ def groupList():
 
 @app.route('/qgmems/gmembers', method='POST')
 def groupMembers():
+    print("@app.route('/qgmems/gmembers', method='POST')")
     gc = request.forms.get('gc')
+    print(gc)
     group = q.searchGroupMembers(gc)
+    print(group)
     data = [(u'昵称', u'群角色', u'群名片', u'QQ号', u'性别', u'Q龄',
              u'入群时间', u'积分(活跃度)', u'最后发言', u'QQ邮箱')]
     for m in group['mems']:
@@ -341,6 +357,7 @@ def groupMembers():
 
 @app.route('/qgmems/download')
 def download():
+    print("@app.route('/qgmems/download' )")
     resultId = request.query.rid or ''
     result = attachments.get(resultId, '')
     if result:
@@ -356,5 +373,9 @@ def download():
 
 if __name__ == '__main__':
     # https://bottlepy.org/docs/dev/deployment.html#switching-the-server-backend
+    """
     run(app, server='paste', host='localhost',
-        port=8080, debug=True, reloader=True)
+      port=8082, debug=True, reloader=True)"""
+
+    run(app, host='localhost',
+        port=8082, debug=True, reloader=True)

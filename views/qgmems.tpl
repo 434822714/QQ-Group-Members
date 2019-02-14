@@ -156,12 +156,29 @@
     </div>
     <a href="https://github.com/caspartse/QQ-Group-Members" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" src="/static/img/forkme_right_green_007200.png" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png"></a>
     <script type='text/javascript'>
-        function gMembers(gc) {
+	
+	function gMembers(gc) {
             $.ajax({
                 type: 'POST',
                 url: '/qgmems/gmembers',
                 data: 'gc=' + gc,
                 success: function(obj) {
+					print("开始下载w");
+                    var path = '/qgmems/download?rid=' + obj;
+                    window.open(path, '_blank');
+                }
+            });
+        }
+
+	
+	
+        function download(gc) {
+            $.ajax({
+                type: 'POST',
+                url: '/qgmems/gmembers',
+                data: 'gc=' + gc,
+                success: function(obj) {
+					print("开始下载w");
                     var path = '/qgmems/download?rid=' + obj;
                     window.open(path, '_blank');
                 }
@@ -177,6 +194,7 @@
                 success: function(obj) {
                     $('#group_list').empty();
                     $('#group_list').append(obj);
+					console.log("传输成功");
                 }
             });
         }
@@ -192,6 +210,7 @@
                 case 2:
                     $('#login_success').css('display', 'inline-block');
                     $('#tips').text('登录成功');
+					console.log("登陆成功")
                     displayGList();
                     break;
                 case 3:
